@@ -7,6 +7,7 @@
 #include "TriggerType.h"
 #include "MPMTMessages.h"
 #include "ReadoutWindow.h"
+#include "MPMTWaveformSamples.h"
 
 int main(int argc, const char** argv){
 	if(argc<2){
@@ -54,18 +55,19 @@ int main(int argc, const char** argv){
 	std::vector<P_MPMTHit*> trigger_hits;
 	std::vector<TriggerInfo*> trigger_infos;
 	std::vector<P_MPMTWaveformHeader*> mpmt_waveforms;
+	std::vector<MPMTWaveformSamples> waveform_samples;
 	
 	std::vector<P_MPMTHit*>* mpmt_hits_p = &mpmt_hits;
 	std::vector<P_MPMTHit*>* trigger_hits_p = &trigger_hits;
 	std::vector<TriggerInfo*>* trigger_infos_p = &trigger_infos;
 	std::vector<P_MPMTWaveformHeader*>* mpmt_waveforms_p = &mpmt_waveforms;
+	std::vector<MPMTWaveformSamples>* waveform_samples_p = &waveform_samples;
 	
-	//std::vector<unsigned char> waveform_samples; // TODO
 	t_data->SetBranchAddress("mpmt_hits",&mpmt_hits_p);
 	t_data->SetBranchAddress("trigger_hits",&trigger_hits_p);
 	t_data->SetBranchAddress("trigger_infos",&trigger_infos_p);
 	t_data->SetBranchAddress("waveform_headers",&mpmt_waveforms_p);
-	//t_data->Branch("waveform_samples",&waveform_samples); // TODO
+	t_data->SetBranchAddress("waveform_samples",&waveform_samples_p);
 	
 	for(size_t i=0; i<std::min(num_events,t_data->GetEntries()); ++i){
 		std::cout<<"Getting entry "<<i<<std::endl;
@@ -74,7 +76,8 @@ int main(int argc, const char** argv){
 		std::cout<<mpmt_hits.size()<<" mpmt_hits"<<std::endl;
 		std::cout<<trigger_hits.size()<<" trigger_hits"<<std::endl;
 		std::cout<<trigger_infos.size()<<" trigger_infos"<<std::endl;
-		std::cout<<mpmt_waveforms.size()<<" waveforms"<<std::endl;
+		std::cout<<mpmt_waveforms.size()<<" waveform_headers"<<std::endl;
+		std::cout<<waveform_samples.size()<<" waveform_samples"<<std::endl;
 		
 		std::cout<<"first mpmt_hit:"<<std::endl;
 		std::cout<<"spill: "<<mpmt_hits.front()->spill_num<<std::endl;
@@ -101,15 +104,8 @@ int main(int argc, const char** argv){
 		trigger_hits.front()->hit->Print();
 		
 		/*
-		// getters
-		trigger_hits.front()->hit->GetHeader();
-		trigger_hits.front()->hit->GetEventType();
-		trigger_hits.front()->hit->GetChannel();
-		trigger_hits.front()->hit->GetCoarseCounter();
-		trigger_hits.front()->hit->GetFineTime();
-		trigger_hits.front()->hit->GetCharge();
-		trigger_hits.front()->hit->GetQualityFactor();
-		trigger_hits.front()->hit->GetFlags();
+		trigger_hits is of same type as mpmt_hits, so getters for trigger_hits.front()->hit
+		are same as for mpmt_hits.front()->hit above.
 		*/
 		
 		std::cout<<"first trigger_info"<<std::endl;
@@ -131,7 +127,7 @@ int main(int argc, const char** argv){
 		
 		/*
 		// getters
-		trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader()==1;
+		trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetEventType();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetLED();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetGain();
@@ -155,6 +151,9 @@ int main(int argc, const char** argv){
 		mpmt_waveforms.front()->waveform_header->GetLength();
 		mpmt_waveforms.front()->waveform_header->GetReserved();
 		*/
+		
+		std::cout<<"first waveforms samples at "<<&waveform_samples.front().samples<<"\nPrint: "<<std::endl;
+		waveform_samples.front().Print();
 		
 	}
 	

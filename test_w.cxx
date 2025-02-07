@@ -7,6 +7,7 @@
 #include "TriggerType.h"
 #include "MPMTMessages.h"
 #include "ReadoutWindow.h"
+#include "MPMTWaveformSamples.h"
 
 int main(){
 	std::cout<<"making output file"<<std::endl;
@@ -26,18 +27,19 @@ int main(){
 	std::vector<P_MPMTHit*> trigger_hits;
 	std::vector<TriggerInfo*> trigger_infos;
 	std::vector<P_MPMTWaveformHeader*> mpmt_waveforms;
-	//std::vector<unsigned char> waveform_samples;
+	std::vector<MPMTWaveformSamples> waveform_samples;
 	t_data->Branch("mpmt_hits",&mpmt_hits);
 	t_data->Branch("trigger_hits",&trigger_hits);
 	t_data->Branch("trigger_infos",&trigger_infos);
 	t_data->Branch("waveform_headers",&mpmt_waveforms);
-	//t_data->Branch("waveform_samples",&waveform_samples);
+	t_data->Branch("waveform_samples",&waveform_samples);
 	
 	std::cout<<"making base pointers"<<std::endl;
 	mpmt_hits.push_back(new P_MPMTHit);
 	trigger_hits.push_back(new P_MPMTHit);
 	trigger_infos.push_back(new TriggerInfo);
 	mpmt_waveforms.push_back(new P_MPMTWaveformHeader);
+	waveform_samples.resize(1);
 	
 	std::cout<<"populating mpmt_hits"<<std::endl;
 	mpmt_hits.front()->spill_num = 777;
@@ -99,6 +101,13 @@ int main(){
 	mpmt_waveforms.front()->waveform_header->SetLength(48);
 	mpmt_waveforms.front()->waveform_header->SetReserved(0);
 	
+	std::cout<<"populating waveform samples"<<std::endl;
+	waveform_samples.front().nsamples = mpmt_waveforms.front()->waveform_header->GetNumSamples();
+	waveform_samples.front().samples = new unsigned char[waveform_samples.front().nsamples];
+	for(size_t i=0; i<waveform_samples.front().nsamples; ++i){
+		waveform_samples.front().samples[i] = i;
+	}
+	
 	std::cout<<"filling tree"<<std::endl;
 	t_data->Fill();
 	
@@ -106,7 +115,20 @@ int main(){
 	fout.Write();
 	fout.Close();
 	
-	// TODO cleanup
+	// cleanup
+	std::cout<<"Cleanup..."<<std::endl;
+	delete mpmt_hits.front()->hit; // MPMTHit
+	delete trigger_hits.front()->hit; // MPMTHit
+	delete trigger_infos.front()->mpmt_LEDs.front()->led; // MPMTLED
+	//delete trigger_infos.front()->mpmt_LEDs.front(); // P_MPMTLED. ~TriggerInfo deletes its mpmt_LEDs
+	delete mpmt_waveforms.front()->waveform_header; // MPMTWaveformHeader
+	delete[] waveform_samples.front().samples;
+	
+	delete mpmt_hits.front(); // P_MPMTHit;
+	delete trigger_hits.front(); // P_MPMTHit;
+	delete trigger_infos.front(); // TriggerInfo;
+	delete mpmt_waveforms.front(); // P_MPMTWaveformHeader;
+	
 	std::cout<<"done"<<std::endl;
 	
 	return 0;

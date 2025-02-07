@@ -7,6 +7,7 @@
 #include "TriggerType.h"
 #include "MPMTMessages.h"
 #include "ReadoutWindow.h"
+#include "MPMTWaveformSamples.h"
 
 int main(){
 	std::cout<<"opening input file"<<std::endl;
@@ -18,6 +19,8 @@ int main(){
 		std::cerr<<"no daqinfo tree!"<<std::endl;
 		return -1;
 	}
+	assert(t_daq_info->GetEntries()==1 && "bad # daqinfo tree entries");
+	
 	DAQInfo daq_info;
 	DAQInfo* daq_info_p = &daq_info;
 	t_daq_info->SetBranchAddress("daq_info", &daq_info_p);
@@ -31,22 +34,25 @@ int main(){
 		std::cerr<<"no data tree!"<<std::endl;
 		return -2;
 	}
+	assert(t_data->GetEntries()==1 && "bad # data tree entries");
+	
 	std::vector<P_MPMTHit*> mpmt_hits;
 	std::vector<P_MPMTHit*> trigger_hits;
 	std::vector<TriggerInfo*> trigger_infos;
 	std::vector<P_MPMTWaveformHeader*> mpmt_waveforms;
+	std::vector<MPMTWaveformSamples> waveform_samples;
 	
 	std::vector<P_MPMTHit*>* mpmt_hits_p = &mpmt_hits;
 	std::vector<P_MPMTHit*>* trigger_hits_p = &trigger_hits;
 	std::vector<TriggerInfo*>* trigger_infos_p = &trigger_infos;
 	std::vector<P_MPMTWaveformHeader*>* mpmt_waveforms_p = &mpmt_waveforms;
+	std::vector<MPMTWaveformSamples>* waveform_samples_p = &waveform_samples;
 	
-	//std::vector<unsigned char> waveform_samples; // TODO
 	t_data->SetBranchAddress("mpmt_hits",&mpmt_hits_p);
 	t_data->SetBranchAddress("trigger_hits",&trigger_hits_p);
 	t_data->SetBranchAddress("trigger_infos",&trigger_infos_p);
 	t_data->SetBranchAddress("waveform_headers",&mpmt_waveforms_p);
-	//t_data->Branch("waveform_samples",&waveform_samples); // TODO
+	t_data->SetBranchAddress("waveform_samples",&waveform_samples_p);
 	
 	t_data->GetEntry(0);
 	
@@ -54,26 +60,21 @@ int main(){
 	std::cout<<mpmt_hits.size()<<" mpmt_hits"<<std::endl;
 	std::cout<<trigger_hits.size()<<" trigger_hits"<<std::endl;
 	std::cout<<trigger_infos.size()<<" trigger_infos"<<std::endl;
-	std::cout<<mpmt_waveforms.size()<<" waveforms"<<std::endl;
+	std::cout<<mpmt_waveforms.size()<<" waveform_headers"<<std::endl;
+	std::cout<<waveform_samples.size()<<" waveform_samples"<<std::endl;
 	
 	assert(mpmt_hits.size()==1 && "no mpmt_hits!");
 	assert(trigger_hits.size()==1 && "no trigger_hits!");
 	assert(trigger_infos.size()==1 && "no trigger_infos!");
-	assert(mpmt_waveforms.size()==1 && "no waveforms!");
-	
-	////////
-	mpmt_hits.front()->Print();
-	trigger_hits.front()->Print();
-	trigger_infos.front()->Print();
-	mpmt_waveforms.front()->Print();
-	return 0;
-	/////////
+	assert(mpmt_waveforms.size()==1 && "no waveform headers!");
+	assert(waveform_samples.size()==1 && "no waveform samples!");
 	
 	std::cout<<"getting first elements"<<std::endl;
 	std::cout<<"first mpmt_hits at "<<mpmt_hits.front()<<std::endl;
 	std::cout<<"first trigger_hits at "<<trigger_hits.front()<<std::endl;
 	std::cout<<"first trigger_infos at "<<trigger_infos.front()<<std::endl;
 	std::cout<<"first mpmt_waveforms at "<<mpmt_waveforms.front()<<std::endl;
+	// no such check for waveform samples as its not a pointer
 	
 	std::cout<<"checking first mpmt_hit"<<std::endl;
 	assert(mpmt_hits.front()->spill_num == 777 && "bad mpmt_hits spillnum");
@@ -148,6 +149,14 @@ int main(){
 	assert(mpmt_waveforms.front()->waveform_header->GetNumSamples()==32 && "bad nsamples");
 	assert(mpmt_waveforms.front()->waveform_header->GetLength()==48 && "bad length");
 	assert(mpmt_waveforms.front()->waveform_header->GetReserved()==0 && "bad reserved");
+	
+	std::cout<<"first waveforms samples at "<<&waveform_samples.front().samples<<"\nPrint: "<<std::endl;
+	waveform_samples.front().Print(true);
+	std::cout<<"checking vals"<<std::endl;
+	assert(waveform_samples.front().nsamples==32 && "bad nsamples");
+	for(size_t i=0; i<waveform_samples.front().nsamples; ++i){
+		assert(waveform_samples.front().samples[i]==i && "bad sample val");
+	}
 	
 	std::cout<<"closing file"<<std::endl;
 	f.Close();
