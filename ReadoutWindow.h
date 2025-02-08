@@ -102,48 +102,48 @@ public:
     mpmt_collection=0;
   }
   ~PReadoutWindow(){
-    //printf("e1 %u\n", triggers_info->size());
-    for(unsigned int i=0; i< triggers_info->size(); i++){
-      delete triggers_info->at(i);
-      triggers_info->at(i)=0;
-  
-    }
+    ////printf("e1 %u\n", triggers_info->size());
+    //    for(unsigned int i=0; i< triggers_info->size(); i++){
+    // delete triggers_info->at(i);
+    // triggers_info->at(i)=0;
+    //}
     
-    triggers_info->clear();
-  //printf("e1.5\n");
-  //    delete triggers_info;
+    //triggers_info->clear();
+    ////printf("e1.5\n");
+    ////    delete triggers_info;
     triggers_info =0;
-   //printf("e2\n");
-   
-    for(unsigned int i=0; i< mpmt_hits.size(); i++){
-      delete mpmt_hits.at(i);
-      mpmt_hits.at(i)=0;
-
-    }
+    ////printf("e2\n");
+    
+    //for(unsigned int i=0; i< mpmt_hits.size(); i++){
+      ////printf("e2/1\n");
+      ////delete mpmt_hits.at(i);
+      //mpmt_hits.at(i)=0;
+      ////printf("e2.1\n");
+    // }
     mpmt_hits.clear();
-   //printf("e3\n");
-   
-        for(unsigned int i=0; i< mpmt_waveforms.size(); i++){
-      delete mpmt_waveforms.at(i);
-      mpmt_waveforms.at(i)=0;
-
-    }
+    //printf("e3\n");
+    
+    //for(unsigned int i=0; i< mpmt_waveforms.size(); i++){
+      //delete mpmt_waveforms.at(i);
+      //mpmt_waveforms.at(i)=0;
+      
+    //}
     mpmt_waveforms.clear();
-   //printf("e4\n");
-   
-    for(unsigned int i=0; i< trigger_hits->size(); i++){
-      delete trigger_hits->at(i);
-      trigger_hits->at(i)=0;
-
-    }
-    trigger_hits->clear();
-   //printf("e5\n");
-   //    delete trigger_hits;
+    //printf("e4\n");
+    
+    //for(unsigned int i=0; i< trigger_hits->size(); i++){
+    //delete trigger_hits->at(i);
+    //trigger_hits->at(i)=0;
+      
+    //}
+    //trigger_hits->clear();
+    //printf("e5\n");
+    //    delete trigger_hits;
     trigger_hits =0;
-   //printf("e6\n");
+    //printf("e6\n");
     delete mpmt_collection;
     mpmt_collection=0;
-       //printf("e7\n");
+    //printf("e7\n");
   }
   
   bool Print(){

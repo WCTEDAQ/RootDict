@@ -7,6 +7,7 @@
 #include "TriggerType.h"
 #include "MPMTMessages.h"
 #include "ReadoutWindow.h"
+#include "MPMTWaveformSamples.h"
 
 int main(int argc, const char** argv){
 	if(argc<2){
@@ -54,18 +55,30 @@ int main(int argc, const char** argv){
 	std::vector<P_MPMTHit*> trigger_hits;
 	std::vector<TriggerInfo*> trigger_infos;
 	std::vector<P_MPMTWaveformHeader*> mpmt_waveforms;
+	std::vector<MPMTWaveformSamples> waveform_samples;
 	
 	std::vector<P_MPMTHit*>* mpmt_hits_p = &mpmt_hits;
 	std::vector<P_MPMTHit*>* trigger_hits_p = &trigger_hits;
 	std::vector<TriggerInfo*>* trigger_infos_p = &trigger_infos;
 	std::vector<P_MPMTWaveformHeader*>* mpmt_waveforms_p = &mpmt_waveforms;
+	std::vector<MPMTWaveformSamples>* waveform_samples_p = &waveform_samples;
 	
-	//std::vector<unsigned char> waveform_samples; // TODO
 	t_data->SetBranchAddress("mpmt_hits",&mpmt_hits_p);
 	t_data->SetBranchAddress("trigger_hits",&trigger_hits_p);
 	t_data->SetBranchAddress("trigger_infos",&trigger_infos_p);
 	t_data->SetBranchAddress("waveform_headers",&mpmt_waveforms_p);
-	//t_data->Branch("waveform_samples",&waveform_samples); // TODO
+	t_data->SetBranchAddress("waveform_samples",&waveform_samples_p);
+	
+	t_data->SetBranchStatus("*",0);
+	t_data->SetBranchStatus("mpmt_hits",1);
+	t_data->SetBranchStatus("trigger_hits",1);
+	t_data->SetBranchStatus("trigger_infos",1);
+	t_data->SetBranchStatus("waveform_samples",1);
+	/*
+	t_data->SetBranchStatus("waveform_samples.nsamples",1); // ok for now
+	t_data->SetBranchStatus("waveform_samples.samples",0);  // not ok
+	t_data->SetBranchStatus("waveform_headers",0);          // not ok
+	*/
 	
 	for(size_t i=0; i<std::min(num_events,t_data->GetEntries()); ++i){
 		std::cout<<"Getting entry "<<i<<std::endl;
@@ -74,13 +87,19 @@ int main(int argc, const char** argv){
 		std::cout<<mpmt_hits.size()<<" mpmt_hits"<<std::endl;
 		std::cout<<trigger_hits.size()<<" trigger_hits"<<std::endl;
 		std::cout<<trigger_infos.size()<<" trigger_infos"<<std::endl;
-		std::cout<<mpmt_waveforms.size()<<" waveforms"<<std::endl;
+		std::cout<<mpmt_waveforms.size()<<" waveform_headers"<<std::endl;
+		std::cout<<waveform_samples.size()<<" waveform_samples"<<std::endl;
+		if(mpmt_waveforms.size()!=waveform_samples.size()){
+			std::cerr<<"ERROR! Mismatched waveform header and sample vectors!"<<std::endl;
+		}
 		
-		std::cout<<"first mpmt_hit:"<<std::endl;
-		std::cout<<"spill: "<<mpmt_hits.front()->spill_num<<std::endl;
-		std::cout<<"card: "<<mpmt_hits.front()->card_id<<std::endl;
-		std::cout<<"hit at "<<mpmt_hits.front()->hit<<"\nHit details:"<<std::endl;
-		mpmt_hits.front()->hit->Print();
+		if(mpmt_hits.size()){
+			std::cout<<"first mpmt_hit:"<<std::endl;
+			std::cout<<"spill: "<<mpmt_hits.front()->spill_num<<std::endl;
+			std::cout<<"card: "<<mpmt_hits.front()->card_id<<std::endl;
+			std::cout<<"hit at "<<mpmt_hits.front()->hit<<"\nHit details:"<<std::endl;
+			mpmt_hits.front()->hit->Print();
+		}
 		
 		/*
 		// getters
@@ -94,37 +113,37 @@ int main(int argc, const char** argv){
 		mpmt_hits.front()->hit->GetFlags();
 		*/
 		
-		std::cout<<"first trigger_hit:"<<std::endl;
-		std::cout<<"spill: "<<trigger_hits.front()->spill_num<<std::endl;
-		std::cout<<"card: "<<trigger_hits.front()->card_id<<std::endl;
-		std::cout<<"hit at "<<trigger_hits.front()->hit<<"\nHit details:"<<std::endl;
-		trigger_hits.front()->hit->Print();
+		if(trigger_hits.size()){
+			std::cout<<"first trigger_hit:"<<std::endl;
+			std::cout<<"spill: "<<trigger_hits.front()->spill_num<<std::endl;
+			std::cout<<"card: "<<trigger_hits.front()->card_id<<std::endl;
+			std::cout<<"hit at "<<trigger_hits.front()->hit<<"\nHit details:"<<std::endl;
+			trigger_hits.front()->hit->Print();
+		}
 		
-		/*
-		trigger_hits is of same type as mpmt_hits, so getters for trigger_hits.front()->hit
-		are same as for mpmt_hits.front()->hit above.
-		*/
-		
-		std::cout<<"first trigger_info"<<std::endl;
-		std::cout<<"spill: "<<trigger_infos.front()->spill_num<<std::endl;
-		std::cout<<"card: "<<trigger_infos.front()->card_id<<std::endl;
-		std::cout<<"time: "<<trigger_infos.front()->time<<std::endl;
-		std::cout<<"type: "<<static_cast<int>(trigger_infos.front()->type)<<std::endl; // FIXME use underlying_type
-		std::cout<<"vme: "<<trigger_infos.front()->vme_event_num<<std::endl;
-		std::cout<<"#leds: "<<trigger_infos.front()->mpmt_LEDs.size()<<std::endl;
-		
-		std::cout<<"first mpmt_led at "<<trigger_infos.front()->mpmt_LEDs.front()<<"\nmpmt_led details:"<<std::endl;
-		trigger_infos.front()->mpmt_LEDs.front()->Print();
-		
-		std::cout<<"first trigger info's first mpmt_led"<<std::endl;
-		std::cout<<"spill: "<<trigger_infos.front()->mpmt_LEDs.front()->spill_num<<std::endl;
-		std::cout<<"card: "<<trigger_infos.front()->mpmt_LEDs.front()->card_id<<std::endl;
-		std::cout<<"led at: "<<trigger_infos.front()->mpmt_LEDs.front()->led<<"\nled details:"<<std::endl;
-		trigger_infos.front()->mpmt_LEDs.front()->led->Print();
+		if(trigger_infos.size()){
+			std::cout<<"first trigger_info"<<std::endl;
+			std::cout<<"spill: "<<trigger_infos.front()->spill_num<<std::endl;
+			std::cout<<"card: "<<trigger_infos.front()->card_id<<std::endl;
+			std::cout<<"time: "<<trigger_infos.front()->time<<std::endl;
+			std::cout<<"type: "<<static_cast<int>(trigger_infos.front()->type)<<std::endl; // FIXME use underlying_type
+			std::cout<<"vme: "<<trigger_infos.front()->vme_event_num<<std::endl;
+			std::cout<<"#leds: "<<trigger_infos.front()->mpmt_LEDs.size()<<std::endl;
+			
+			std::cout<<"first mpmt_led at "<<trigger_infos.front()->mpmt_LEDs.front()<<"\nmpmt_led details:"<<std::endl;
+			trigger_infos.front()->mpmt_LEDs.front()->Print();
+			
+			
+			std::cout<<"first trigger info's first mpmt_led"<<std::endl;
+			std::cout<<"spill: "<<trigger_infos.front()->mpmt_LEDs.front()->spill_num<<std::endl;
+			std::cout<<"card: "<<trigger_infos.front()->mpmt_LEDs.front()->card_id<<std::endl;
+			std::cout<<"led at: "<<trigger_infos.front()->mpmt_LEDs.front()->led<<"\nled details:"<<std::endl;
+			trigger_infos.front()->mpmt_LEDs.front()->led->Print();
+		}
 		
 		/*
 		// getters
-		trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader();
+		trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader()==1;
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetEventType();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetLED();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetGain();
@@ -135,8 +154,10 @@ int main(int argc, const char** argv){
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetReserved();
 		*/
 		
-		std::cout<<"first mpmt_wavefroms' header at "<<mpmt_waveforms.front()->waveform_header<<"\nheader details: "<<std::endl;
-		mpmt_waveforms.front()->waveform_header->Print();
+		if(mpmt_waveforms.size()){
+			std::cout<<"first mpmt_wavefroms' header at "<<mpmt_waveforms.front()->waveform_header<<"\nheader details: "<<std::endl;
+			mpmt_waveforms.front()->waveform_header->Print();
+		}
 		
 		/*
 		// getters
@@ -149,12 +170,16 @@ int main(int argc, const char** argv){
 		mpmt_waveforms.front()->waveform_header->GetReserved();
 		*/
 		
+		if(waveform_samples.size()){
+			std::cout<<"first waveforms samples at "<<&waveform_samples.front().samples<<"\nPrint: "<<std::endl;
+			waveform_samples.front().Print();
+		}
+		
 	}
 	
 	std::cout<<"closing file"<<std::endl;
 	f.Close();
 	
-	// TODO cleanup
 	std::cout<<"done"<<std::endl;
 	
 	return 0;
