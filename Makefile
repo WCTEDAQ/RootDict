@@ -17,7 +17,7 @@ libWCTE_RootDict.so: WCTE_RootDict.cxx
 clean:
 	rm -f libWCTE_RootDict.so  WCTE_RootDict*  WCTE_RootDict test_r test_w test_daq
 
-test: test_w.cxx test_r.cxx test_read_daq.cxx libWCTE_RootDict.so
+test: test_w.cxx test_r.cxx test_daq.cxx libWCTE_RootDict.so
 	g++ $(CXXFLAGS) -D__CLING__ -Wl,--no-undefined -o test_w test_w.cxx -I. -I$(BASEDIR)/DataModel -I`root-config --incdir` -I$(TOOLFDIR)/include -L. -lWCTE_RootDict `root-config --libs`
 	g++ $(CXXFLAGS) -D__CLING__ -Wl,--no-undefined -o test_r test_r.cxx -I. -I$(BASEDIR)/DataModel -I`root-config --incdir` -I$(TOOLFDIR)/include -L. -lWCTE_RootDict `root-config --libs`
-	g++ $(CXXFLAGS) -D__CLING__ -Wl,--no-undefined -o test_daq test_read_daq.cxx -I. -I$(BASEDIR)/DataModel -I`root-config --incdir` -I$(TOOLFDIR)/include -L. -lWCTE_RootDict `root-config --libs`
+	g++ $(CXXFLAGS) -D__CLING__ -Wl,--no-undefined -o test_daq test_daq.cxx -I. -I$(BASEDIR)/DataModel -I`root-config --incdir` -I$(TOOLFDIR)/include -L. -lWCTE_RootDict `root-config --libs`
