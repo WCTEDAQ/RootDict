@@ -69,15 +69,13 @@ int main(int argc, const char** argv){
 	t_data->SetBranchAddress("waveform_headers",&mpmt_waveforms_p);
 	t_data->SetBranchAddress("waveform_samples",&waveform_samples_p);
 	
+	/*
 	t_data->SetBranchStatus("*",0);
 	t_data->SetBranchStatus("mpmt_hits",1);
 	t_data->SetBranchStatus("trigger_hits",1);
 	t_data->SetBranchStatus("trigger_infos",1);
 	t_data->SetBranchStatus("waveform_samples",1);
-	/*
-	t_data->SetBranchStatus("waveform_samples.nsamples",1); // ok for now
-	t_data->SetBranchStatus("waveform_samples.samples",0);  // not ok
-	t_data->SetBranchStatus("waveform_headers",0);          // not ok
+	t_data->SetBranchStatus("waveform_headers",1);
 	*/
 	
 	for(size_t i=0; i<std::min(num_events,t_data->GetEntries()); ++i){
@@ -121,6 +119,11 @@ int main(int argc, const char** argv){
 			trigger_hits.front()->hit->Print();
 		}
 		
+		/*
+		trigger_hits is of same type as mpmt_hits, so getters for trigger_hits.front()->hit
+		are same as for mpmt_hits.front()->hit above.
+		*/
+		
 		if(trigger_infos.size()){
 			std::cout<<"first trigger_info"<<std::endl;
 			std::cout<<"spill: "<<trigger_infos.front()->spill_num<<std::endl;
@@ -130,20 +133,21 @@ int main(int argc, const char** argv){
 			std::cout<<"vme: "<<trigger_infos.front()->vme_event_num<<std::endl;
 			std::cout<<"#leds: "<<trigger_infos.front()->mpmt_LEDs.size()<<std::endl;
 			
-			std::cout<<"first mpmt_led at "<<trigger_infos.front()->mpmt_LEDs.front()<<"\nmpmt_led details:"<<std::endl;
-			trigger_infos.front()->mpmt_LEDs.front()->Print();
-			
-			
-			std::cout<<"first trigger info's first mpmt_led"<<std::endl;
-			std::cout<<"spill: "<<trigger_infos.front()->mpmt_LEDs.front()->spill_num<<std::endl;
-			std::cout<<"card: "<<trigger_infos.front()->mpmt_LEDs.front()->card_id<<std::endl;
-			std::cout<<"led at: "<<trigger_infos.front()->mpmt_LEDs.front()->led<<"\nled details:"<<std::endl;
-			trigger_infos.front()->mpmt_LEDs.front()->led->Print();
+			if(trigger_infos.front()->mpmt_LEDs.size()){
+				std::cout<<"first mpmt_led at "<<trigger_infos.front()->mpmt_LEDs.front()<<"\nmpmt_led details:"<<std::endl;
+				trigger_infos.front()->mpmt_LEDs.front()->Print();
+				
+				std::cout<<"first trigger info's first mpmt_led"<<std::endl;
+				std::cout<<"spill: "<<trigger_infos.front()->mpmt_LEDs.front()->spill_num<<std::endl;
+				std::cout<<"card: "<<trigger_infos.front()->mpmt_LEDs.front()->card_id<<std::endl;
+				std::cout<<"led at: "<<trigger_infos.front()->mpmt_LEDs.front()->led<<"\nled details:"<<std::endl;
+				trigger_infos.front()->mpmt_LEDs.front()->led->Print();
+			}
 		}
 		
 		/*
 		// getters
-		trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader()==1;
+		trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetEventType();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetLED();
 		trigger_infos.front()->mpmt_LEDs.front()->led->GetGain();
@@ -171,7 +175,8 @@ int main(int argc, const char** argv){
 		*/
 		
 		if(waveform_samples.size()){
-			std::cout<<"first waveforms samples at "<<&waveform_samples.front().samples<<"\nPrint: "<<std::endl;
+			std::cout<<"first waveform had "<<waveform_samples.front().nbytes
+			         <<" sample bytes at "<<&waveform_samples.front().bytes<<"\nPrint: "<<std::endl;
 			waveform_samples.front().Print();
 		}
 		
@@ -180,6 +185,7 @@ int main(int argc, const char** argv){
 	std::cout<<"closing file"<<std::endl;
 	f.Close();
 	
+	// TODO cleanup
 	std::cout<<"done"<<std::endl;
 	
 	return 0;

@@ -76,7 +76,8 @@ struct MPMTWaveformHeader{
 
 struct P_MPMTWaveformHeader :SerialisableObject {
 
-  MPMTWaveformHeader* waveform_header;
+  MPMTWaveformHeader* waveform_header=0;
+  unsigned char* samples; //! << load bearing comment, don't serialise it ROOT
   unsigned long spill_num;
   unsigned short card_id;
   bool Print(){return waveform_header->Print();}
@@ -86,6 +87,7 @@ struct P_MPMTWaveformHeader :SerialisableObject {
     waveform_header=in_waveform_header;
     spill_num=in_spill_num;
     card_id=in_card_id;
+    samples = in_waveform_header->GetData() + in_waveform_header->GetLength();
   }
 
   ~P_MPMTWaveformHeader(){
@@ -101,6 +103,13 @@ struct P_MPMTWaveformHeader :SerialisableObject {
     if(waveform_header==0) waveform_header = new MPMTWaveformHeader();
 
     bs & waveform_header->data;
+
+    if(bs.m_write) bs.Bwrite(waveform_header->GetData()+waveform_header->GetSize(), waveform_header->GetLength());
+    else{
+      samples = new unsigned char[waveform_header->GetLength()];
+      bs.Bread(&samples[0], waveform_header->GetLength());
+    }
+    
     bs & spill_num;
     bs & card_id;
 

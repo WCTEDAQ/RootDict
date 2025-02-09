@@ -218,7 +218,7 @@ public:
       std::cout<<"triggers_info size="<<size<<std::endl;
       for(unsigned int i=0; i<size; i++){
 	TriggerInfo* tmp = new TriggerInfo;
-	bs & tmp;
+	bs & (*tmp);
 	triggers_info->at(i)=tmp;
       }
  std::cout<<"read triggers_info"<<std::endl;
@@ -229,7 +229,7 @@ public:
       std::cout<<"trigger_hits size="<<size<<std::endl;
       for(unsigned int i=0; i<size; i++){
         P_MPMTHit* tmp = new P_MPMTHit;
-	bs & tmp;
+	bs & (*tmp);
 	trigger_hits->at(i) = tmp;
       }
       
@@ -240,7 +240,7 @@ std::cout<<"read trigger_hits"<<std::endl;
        std::cout<<"mpmt_hits size="<<size<<std::endl;       
        for(unsigned int i=0; i<size; i++){
 	 P_MPMTHit* tmp = new P_MPMTHit;
-	 bs & tmp;
+	 bs & (*tmp);
 	 mpmt_hits.at(i)= tmp;
        }
 
@@ -251,7 +251,7 @@ std::cout<<"read mpmt_hits"<<std::endl;
        std::cout<<"read waveforms size="<<size<<std::endl;
        for(unsigned int i=0; i<size; i++){
 	 P_MPMTWaveformHeader* tmp = new P_MPMTWaveformHeader;
-	 bs & tmp;
+	 bs & (*tmp);
 	 mpmt_waveforms.at(i) =tmp;
        }
 
