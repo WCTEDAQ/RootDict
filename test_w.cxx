@@ -102,10 +102,10 @@ int main(){
 	mpmt_waveforms.front()->waveform_header->SetReserved(0);
 	
 	std::cout<<"populating waveform samples"<<std::endl;
-	waveform_samples.front().nsamples = mpmt_waveforms.front()->waveform_header->GetNumSamples();
-	waveform_samples.front().samples = new unsigned char[waveform_samples.front().nsamples];
-	for(size_t i=0; i<waveform_samples.front().nsamples; ++i){
-		waveform_samples.front().samples[i] = i;
+	waveform_samples.front().nbytes = mpmt_waveforms.front()->waveform_header->GetLength();
+	waveform_samples.front().bytes = new unsigned char[waveform_samples.front().nbytes];
+	for(size_t i=0; i<waveform_samples.front().nbytes; ++i){
+		waveform_samples.front().bytes[i] = i;
 	}
 	
 	std::cout<<"filling tree"<<std::endl;
@@ -122,7 +122,7 @@ int main(){
 	delete trigger_infos.front()->mpmt_LEDs.front()->led; // MPMTLED
 	//delete trigger_infos.front()->mpmt_LEDs.front(); // P_MPMTLED. ~TriggerInfo deletes its mpmt_LEDs
 	delete mpmt_waveforms.front()->waveform_header; // MPMTWaveformHeader
-	delete[] waveform_samples.front().samples;
+	delete[] waveform_samples.front().bytes;
 	
 	delete mpmt_hits.front(); // P_MPMTHit;
 	delete trigger_hits.front(); // P_MPMTHit;

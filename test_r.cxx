@@ -150,12 +150,13 @@ int main(){
 	assert(mpmt_waveforms.front()->waveform_header->GetLength()==48 && "bad length");
 	assert(mpmt_waveforms.front()->waveform_header->GetReserved()==0 && "bad reserved");
 	
-	std::cout<<"first waveforms samples at "<<&waveform_samples.front().samples<<"\nPrint: "<<std::endl;
+	std::cout<<"first waveforms had "<<waveform_samples.front().nbytes<<" bytes at "
+	         <<&waveform_samples.front().bytes<<"\nPrint: "<<std::endl;
 	waveform_samples.front().Print(true);
 	std::cout<<"checking vals"<<std::endl;
-	assert(waveform_samples.front().nsamples==32 && "bad nsamples");
-	for(size_t i=0; i<waveform_samples.front().nsamples; ++i){
-		assert(waveform_samples.front().samples[i]==i && "bad sample val");
+	assert(waveform_samples.front().nbytes==48 && "bad nsamples");
+	for(size_t i=0; i<waveform_samples.front().nbytes; ++i){
+		assert(waveform_samples.front().bytes[i]==i && "bad sample val");
 	}
 	
 	std::cout<<"closing file"<<std::endl;
