@@ -82,7 +82,7 @@ int main(){
 	
 	std::cout<<"populating trigger infos MPMTLEDs front"<<std::endl;
 	trigger_infos.front()->mpmt_LEDs.front()->led->SetHeader(1);
-	trigger_infos.front()->mpmt_LEDs.front()->led->SetEventType(0);
+	trigger_infos.front()->mpmt_LEDs.front()->led->SetEventType(2); // 2 = led
 	trigger_infos.front()->mpmt_LEDs.front()->led->SetLED(4);
 	trigger_infos.front()->mpmt_LEDs.front()->led->SetGain(1); // 0 or 1
 	trigger_infos.front()->mpmt_LEDs.front()->led->SetDACSetting(66);
