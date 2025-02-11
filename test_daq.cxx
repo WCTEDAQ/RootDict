@@ -178,6 +178,11 @@ int main(int argc, const char** argv){
 			std::cout<<"first waveform had "<<waveform_samples.front().nbytes
 			         <<" sample bytes at "<<&waveform_samples.front().bytes<<"\nPrint: "<<std::endl;
 			waveform_samples.front().Print();
+			
+			/*
+			// getters:
+			mpmt_waveforms.front()->GetSamples();
+			*/
 		}
 		
 	}

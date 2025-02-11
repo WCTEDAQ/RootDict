@@ -5,8 +5,28 @@
 struct MPMTWaveformSamples {
 	MPMTWaveformSamples(){};
 	~MPMTWaveformSamples(){};
-	int nbytes;
+	unsigned int nsamples;
+	int nbytes; // must be type int for root
 	unsigned char* bytes; //[nbytes]  << load bearing comment used by ROOT do not change
+	std::vector<uint16_t> GetSamples(){
+		std::vector<uint16_t> samples;
+		bool toggle=true;
+		for(int i=0; i<(nbytes-1); ){
+			//std::cout<<"building sample "<<samples.size()-1<<" from bytes "<<i<<" and "<<i+1<<std::endl;
+			uint16_t nextsample=0;
+			if(toggle){
+				nextsample = (bytes[i] << 4) | (bytes[i+1] >> 4);
+				++i;
+			} else {
+				nextsample = ( (bytes[i] << 8) | bytes[i+1] ) & 0b0000111111111111;
+				i+=2;
+			}
+			//std::cout<<"pushing back sample "<<nextsample<<std::endl;
+			samples.push_back(nextsample);
+			toggle=!toggle;
+		}
+		return samples;
+	}
 	void Print(bool printbytes=false){
 		std::cout<<"nbytes = "<<nbytes<<std::endl;
 		std::cout<<"bytes at = "<<(void*)bytes<<std::endl;
