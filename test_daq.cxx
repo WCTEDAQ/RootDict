@@ -74,11 +74,14 @@ int main(int argc, const char** argv){
 	t_data->SetBranchStatus("mpmt_hits",1);
 	t_data->SetBranchStatus("trigger_hits",1);
 	t_data->SetBranchStatus("trigger_infos",1);
-	t_data->SetBranchStatus("waveform_samples",1);
 	t_data->SetBranchStatus("waveform_headers",1);
+	t_data->SetBranchStatus("waveform_samples",1);
 	*/
 	
-	for(size_t i=0; i<std::min(num_events,t_data->GetEntries()); ++i){
+	int n_entries_to_read = t_data->GetEntries();
+	if(num_events>0) n_entries_to_read = std::min(num_events,t_data->GetEntries());
+	
+	for(size_t i=0; i<n_entries_to_read; ++i){
 		std::cout<<"Getting entry "<<i<<std::endl;
 		t_data->GetEntry(i);
 	
@@ -177,7 +180,7 @@ int main(int argc, const char** argv){
 		if(waveform_samples.size()){
 			std::cout<<"first waveform had "<<waveform_samples.front().nbytes
 			         <<" sample bytes at "<<&waveform_samples.front().bytes<<"\nPrint: "<<std::endl;
-			waveform_samples.front().Print();
+			waveform_samples.front().Print(true); // true to print samples, false only print #samples & #bytes
 			
 			/*
 			// getters:
@@ -185,6 +188,7 @@ int main(int argc, const char** argv){
 			*/
 		}
 		
+		std::cout<<" ================= "<<std::endl;
 	}
 	
 	std::cout<<"closing file"<<std::endl;
