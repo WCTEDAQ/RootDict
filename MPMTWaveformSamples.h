@@ -5,9 +5,9 @@
 struct MPMTWaveformSamples {
 	MPMTWaveformSamples(){};
 	~MPMTWaveformSamples(){};
-	unsigned int nsamples;
-	int nbytes; // must be type int for root
-	unsigned char* bytes; //[nbytes]  << load bearing comment used by ROOT do not change
+	unsigned int nsamples=0;
+	int nbytes=0; // must be type int for root
+	unsigned char* bytes=0; //[nbytes]  << load bearing comment used by ROOT do not change
 	std::vector<uint16_t> GetSamples(){
 		std::vector<uint16_t> samples;
 		bool toggle=true;
