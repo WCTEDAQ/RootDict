@@ -130,7 +130,7 @@ int main(){
 	
 	std::cout<<"checking first trigger_info's firstmpmt_LEDs' led"<<std::endl;
 	assert(trigger_infos.front()->mpmt_LEDs.front()->led->GetHeader()==1 && "bad header");
-	assert(trigger_infos.front()->mpmt_LEDs.front()->led->GetEventType()==0 && "bad event type");
+	assert(trigger_infos.front()->mpmt_LEDs.front()->led->GetEventType()==2 && "bad event type");
 	assert(trigger_infos.front()->mpmt_LEDs.front()->led->GetLED()==4 && "bad led");
 	assert(trigger_infos.front()->mpmt_LEDs.front()->led->GetGain()==1 && "bad gain");
 	assert(trigger_infos.front()->mpmt_LEDs.front()->led->GetDACSetting()==66 && "bad dac");

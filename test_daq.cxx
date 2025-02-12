@@ -119,7 +119,7 @@ int main(int argc, const char** argv){
 			trigger_hits.front()->hit->Print();
 		}
 		
-		/*                                                                                                                     
+		/*
 		trigger_hits is of same type as mpmt_hits, so getters for trigger_hits.front()->hit
 		are same as for mpmt_hits.front()->hit above.
 		*/
@@ -178,6 +178,11 @@ int main(int argc, const char** argv){
 			std::cout<<"first waveform had "<<waveform_samples.front().nbytes
 			         <<" sample bytes at "<<&waveform_samples.front().bytes<<"\nPrint: "<<std::endl;
 			waveform_samples.front().Print();
+			
+			/*
+			// getters:
+			mpmt_waveforms.front()->GetSamples();
+			*/
 		}
 		
 	}
