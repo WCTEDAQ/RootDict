@@ -96,7 +96,6 @@ int main(int argc, const char** argv){
 		
 		if(mpmt_hits.size()){
 			std::cout<<"first mpmt_hit:"<<std::endl;
-			std::cout<<"spill: "<<mpmt_hits.front()->spill_num<<std::endl;
 			std::cout<<"card: "<<mpmt_hits.front()->card_id<<std::endl;
 			std::cout<<"hit at "<<mpmt_hits.front()->hit<<"\nHit details:"<<std::endl;
 			mpmt_hits.front()->hit->Print();
@@ -116,7 +115,6 @@ int main(int argc, const char** argv){
 		
 		if(trigger_hits.size()){
 			std::cout<<"first trigger_hit:"<<std::endl;
-			std::cout<<"spill: "<<trigger_hits.front()->spill_num<<std::endl;
 			std::cout<<"card: "<<trigger_hits.front()->card_id<<std::endl;
 			std::cout<<"hit at "<<trigger_hits.front()->hit<<"\nHit details:"<<std::endl;
 			trigger_hits.front()->hit->Print();
@@ -141,7 +139,6 @@ int main(int argc, const char** argv){
 				trigger_infos.front()->mpmt_LEDs.front()->Print();
 				
 				std::cout<<"first trigger info's first mpmt_led"<<std::endl;
-				std::cout<<"spill: "<<trigger_infos.front()->mpmt_LEDs.front()->spill_num<<std::endl;
 				std::cout<<"card: "<<trigger_infos.front()->mpmt_LEDs.front()->card_id<<std::endl;
 				std::cout<<"led at: "<<trigger_infos.front()->mpmt_LEDs.front()->led<<"\nled details:"<<std::endl;
 				trigger_infos.front()->mpmt_LEDs.front()->led->Print();

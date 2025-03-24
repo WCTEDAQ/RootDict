@@ -16,6 +16,9 @@
 #include <TDCHit.h>
 #include <QDCHit.h>
 #include <MPMTMessages.h>
+#ifndef __CLING__
+#include <zmq.hpp>
+#endif
 
 class ReadoutWindow : SerialisableObject{
 
@@ -25,7 +28,7 @@ public:
   std::vector<WCTEMPMTHit> mpmt_hits;  
   std::vector<WCTEMPMTWaveform> mpmt_waveforms;
   std::vector<HKMPMTHit> hk_mpmt_hits;
-   std::vector<WCTEMPMTHit> extra_hits;
+  std::vector<WCTEMPMTHit> extra_hits;
   std::vector<WCTEMPMTWaveform> extra_waveforms;
   std::vector<TDCHit> tdc_hits;
   std::vector<QDCHit> qdc_hits;
@@ -83,14 +86,16 @@ public:
   std::vector<TriggerInfo*>* triggers_info;
   std::vector<P_MPMTHit*> mpmt_hits;  
   std::vector<P_MPMTWaveformHeader*> mpmt_waveforms;
-  //std::vector<HKMPMTHit*> hk_mpmt_hits;
+  std::vector<HKMPMTHit*> hk_mpmt_hits;
   std::vector<P_MPMTHit*>* trigger_hits;
   //std::vector<P_MPMTLED*>* leds;
   //std::vector<WCTEMPMTWaveform*> extra_waveforms;
-  //std::vector<TDCHit*> tdc_hits;
-  //std::vector<QDCHit*> qdc_hits;
+  std::vector<TDCHit*> tdc_hits;
+  std::vector<QDCHit*> qdc_hits;
   unsigned long start_counter;
-  //unsigned long readout_num;
+  unsigned long readout_num;
+  unsigned long spill_num;
+  
 #ifndef __CLING__
   MPMTCollection* mpmt_collection;
 #else
@@ -109,10 +114,12 @@ public:
     //}
     
     //triggers_info->clear();
-    ////printf("e1.5\n");
-    ////    delete triggers_info;
+    //printf("e1.5\n");
+#ifndef __CLING__
+    if(triggers_info != &(mpmt_collection->triggers_info)) delete triggers_info;
+#endif
     triggers_info =0;
-    ////printf("e2\n");
+    //printf("e2\n");
     
     //for(unsigned int i=0; i< mpmt_hits.size(); i++){
       ////printf("e2/1\n");
@@ -138,9 +145,11 @@ public:
     //}
     //trigger_hits->clear();
     //printf("e5\n");
-    //    delete trigger_hits;
+#ifndef __CLING__
+    if(trigger_hits != &(mpmt_collection->triggers)) delete trigger_hits;
+#endif
     trigger_hits =0;
-    //printf("e6\n");
+    //printf("e6 %p\n", this);
     delete mpmt_collection;
     mpmt_collection=0;
     //printf("e7\n");
@@ -176,12 +185,14 @@ public:
   std::string GetVersion(){return "1.0";};
 #ifndef __CLING__
   bool Serialise(BinaryStream &bs){
- std::cout<<"readout window serialise"<<std::endl;
- 
+    // std::cout<<"readout window serialise"<<std::endl;
+
+    bs & spill_num;
+    
     unsigned int size = 0;
     
     if(bs.m_write){
-      std::cout<<"in write"<<std::endl;
+      //std::cout<<"in write"<<std::endl;
       size =  triggers_info->size(); 
       bs & size;
 
@@ -198,7 +209,8 @@ public:
       
        size =  mpmt_hits.size(); 
        bs & size;
-       
+
+       //       printf("hits size=%u\n", size);
        for(unsigned int i=0; i<size; i++){
 	 bs & (*mpmt_hits.at(i));
        }
@@ -260,7 +272,43 @@ std::cout<<"read waveforms"<<std::endl;
       
     }
     return true;
-  } 
+  }
+
+ void Send(zmq::socket_t* sock, int flag=0){
+   if(mpmt_hits.size() !=0){
+     unsigned int tmp_size = mpmt_hits.size();
+     zmq::message_t size(tmp_size);
+     memcpy(size.data(), &tmp_size, sizeof tmp_size);
+     sock->send(size, ZMQ_SNDMORE);
+     
+     for(unsigned int i=0; i< mpmt_hits.size()-1; i++){
+       
+       mpmt_hits.at(i)->Send(sock, ZMQ_SNDMORE);
+       
+     }
+     
+     mpmt_hits.at(mpmt_hits.size()-1)->Send(sock, flag);
+     
+   }
+ }
+
+  void Receive(zmq::socket_t* sock){
+
+    unsigned int tmp_size=0;
+    zmq::message_t ms1;
+    sock->recv(&ms1);
+    memcpy(&tmp_size, ms1.data(), sizeof tmp_size);
+    mpmt_hits.resize(tmp_size);
+    bool more=false;
+
+    for(unsigned int i=0; i < tmp_size; i++){
+      mpmt_hits.at(i) = new P_MPMTHit;
+      mpmt_hits.at(i)->Receive(sock, more);
+    
+    }
+    
+  }
+  
 #endif
   
 };

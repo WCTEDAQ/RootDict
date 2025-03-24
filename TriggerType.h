@@ -79,16 +79,15 @@ struct P_MPMTLED : SerialisableObject {
 
   MPMTLED* led;
   
-  unsigned long spill_num;
-  unsigned short card_id;
+  unsigned char card_id;
+
   P_MPMTLED(){
-    spill_num=0;
+    // spill_num=0;
     card_id=0;
     led=0;
   }
-  P_MPMTLED(MPMTLED* in_led, unsigned long in_spill_num, unsigned short in_card_id){
+  P_MPMTLED(MPMTLED* in_led, unsigned char in_card_id){
     led=in_led;
-    spill_num=in_spill_num;
     card_id=in_card_id;
   }
   ~P_MPMTLED(){
@@ -103,7 +102,7 @@ struct P_MPMTLED : SerialisableObject {
 
     if(led==0) led= new MPMTLED();
     bs & led->data;
-    bs & spill_num;
+    //    bs & spill_num;
     bs & card_id;
     return true;
   }
