@@ -6,12 +6,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <bitset>
+#ifndef __CLING__
+#include <zmq.hpp>
+#endif
 
 class WCTEMPMTPPS{
 
 public:
   WCTEMPMTPPS(){std::fill(std::begin(data), std::end(data), 0);}
-  WCTEMPMTPPS(unsigned short& in_card_id, unsigned char* in_data){ card_id=in_card_id; memcpy(&data[0], in_data, sizeof(data));}
+  WCTEMPMTPPS(unsigned char& in_card_id, unsigned char* in_data){ card_id=in_card_id; memcpy(&data[0], in_data, sizeof(data));}
   
   unsigned short GetCardID(){return card_id;}
   unsigned short GetHeader(){return (data[0] & 0b11000000) >> 6; }
@@ -55,11 +58,33 @@ public:
     std::cout<<" current_PPS_coarse_counter = "<<GetCurrentPPSCoarseCounter()<<std::endl;
     
   }
+#ifndef __CLING__
+  void Send(zmq::socket_t* sock, int flag=0){
+
+    zmq::message_t ms1(sizeof card_id);
+    zmq::message_t ms2(17);
+    
+    memcpy(ms1.data(), &card_id, sizeof card_id);
+    memcpy(ms2.data(), &data[0], 17);
+    
+    //zmq::message_t ms1(&spill_num,sizeof spill_num, bencleanup);
+    //zmq::message_t ms2(hit,hits->GetSize(), bencleanup);
+    
+    sock->send(ms1, ZMQ_SNDMORE);
+    sock->send(ms2, flag);
+
+    
+
+    
+
+  }
+
+  #endif
 
   
 private:
 
-  unsigned short card_id;
+  unsigned char card_id;
   unsigned char data[17];
 
   

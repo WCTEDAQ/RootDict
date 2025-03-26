@@ -276,6 +276,11 @@ std::cout<<"read waveforms"<<std::endl;
 
  void Send(zmq::socket_t* sock, int flag=0){
    if(mpmt_hits.size() !=0){
+     std::string identifier="RW";
+     zmq::message_t identifier_msg(identifier.length()+1);
+     memcpy(identifier_msg.data(), identifier.data(), identifier.length()+1);
+     sock->send(identifier_msg, ZMQ_SNDMORE);
+     
      unsigned int tmp_size = mpmt_hits.size();
      zmq::message_t size(tmp_size);
      memcpy(size.data(), &tmp_size, sizeof tmp_size);
