@@ -12,6 +12,8 @@
 
 #include <SerialisableObject.h>
 
+#include "TBuffer.h"
+
 
 class TriggerInfo;
 
@@ -72,6 +74,13 @@ struct MPMTWaveformHeader{
   }
   
   unsigned char data[10];
+  void Streamer(TBuffer &b){
+	  if (b.IsReading()){
+		  b.ReadFastArray(data, 10);
+	  } else {
+		  b.WriteFastArray(data, 10);
+	  }
+  }
   
 };
 
@@ -98,6 +107,18 @@ struct P_MPMTWaveformHeader :SerialisableObject {
     bytes=0;
   }
   std::string GetVersion(){return "1";};
+  
+  void Streamer(TBuffer &b){
+	  if (b.IsReading()){
+		  if(!waveform_header) waveform_header = new MPMTWaveformHeader();
+		  b.ReadFastArray(waveform_header->data, 11);
+		  b >> card_id;
+	  } else {
+		  b.WriteFastArray(waveform_header->data, 11);
+		  b << card_id;
+	  }
+  }
+
 #ifndef __CLING__
   bool Serialise(BinaryStream &bs){
 
@@ -171,6 +192,14 @@ struct MPMTHit{
 
   unsigned char data[11];
   
+  void Streamer(TBuffer &b){
+	  if (b.IsReading()){
+		  b.ReadFastArray(data, 11);
+	  } else {
+		  b.WriteFastArray(data, 11);
+	  }
+  }
+  
 };
 
 struct P_MPMTHit: SerialisableObject {
@@ -193,6 +222,17 @@ struct P_MPMTHit: SerialisableObject {
     //delete hit;
     hit=0;
 
+  }
+  
+  void Streamer(TBuffer &b){
+	  if (b.IsReading()){
+		  if(!hit) hit = new MPMTHit();
+		  b.ReadFastArray(hit->data, 11);
+		  b >> card_id;
+	  } else {
+		  b.WriteFastArray(hit->data, 11);
+		  b << card_id;
+	  }
   }
   
 #ifndef __CLING__
