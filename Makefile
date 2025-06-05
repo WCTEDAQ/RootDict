@@ -9,7 +9,7 @@ CXXFLAGS= -g -std=c++11
 all: test
 
 WCTE_RootDict.cxx: $(DATAMODEL)/DAQInfo.h $(DATAMODEL)/ReadoutWindow.h $(DATAMODEL)/MPMTMessages.h $(DATAMODEL)/MPMTWaveformSamples.h $(DATAMODEL)/TriggerType.h $(SELFDIR)/SerialisableObject.h WCTE_Linkdef.h
-	rootcling $(SILENCERS) -f $@ -I. -I$(DATAMODEL) -I$(TOOLFDIR)/include -c $^
+	rootcling $(SILENCERS) -f $@ -rml libWCTE_RootDict.so -rmf libWCTE_RootDict.rootmap -I. -I$(DATAMODEL) -I$(TOOLFDIR)/include -c $^
 
 libWCTE_RootDict.so: WCTE_RootDict.cxx
 	g++ $(CXXFLAGS) -D__CLING__ -shared -fPIC -Wl,--no-undefined -o $@ $^ -I. -I$(DATAMODEL) -I`root-config --incdir` -I$(TOOLFDIR)/include `root-config --libs`
