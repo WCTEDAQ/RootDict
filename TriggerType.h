@@ -11,6 +11,7 @@
 #include <SerialisableObject.h>
 #include <MPMTData.h>
 
+#include "TBuffer.h"
 
 class DataModel;
 
@@ -73,6 +74,13 @@ struct MPMTLED{
 
   unsigned char data[9];
 
+  void Streamer(TBuffer &b){
+	  if (b.IsReading()){
+		  b.ReadFastArray(data, 9);
+	  } else {
+		  b.WriteFastArray(data, 9);
+	  }
+  }
 };
 
 struct P_MPMTLED : SerialisableObject {
@@ -97,6 +105,17 @@ struct P_MPMTLED : SerialisableObject {
   bool Print(){return led->Print();}
 
   std::string GetVersion(){return "1.0";}
+  
+  void Streamer(TBuffer &b){
+	  if (b.IsReading()){
+		  if(!led) led = new MPMTLED();
+		  b.ReadFastArray(led->data, 9);
+		  b >> card_id;
+	  } else {
+		  b.WriteFastArray(led->data, 9);
+		  b << card_id;
+	  }
+  }
 #ifndef __CLING__
   bool Serialise(BinaryStream &bs){
 
@@ -139,6 +158,41 @@ public:
     return true;
   }
   std::string GetVersion(){return "1.0";}
+  void Streamer(TBuffer &b){
+    if (b.IsReading()){
+      unsigned int R__s, R__c;
+      Version_t R__v = b.ReadVersion(&R__s, &R__c);
+      unsigned char type_val;
+      b >> type_val;
+      type = static_cast<TriggerType>(type_val);
+      b >> time;
+      b >> card_id;
+      b >> spill_num;
+      b >> vme_event_num;
+      mpmt_LEDs.clear();
+      size_t n_leds = 0;
+      b >> n_leds;
+      mpmt_LEDs.reserve(n_leds);
+      for (size_t i=0; i<n_leds; i++){
+        P_MPMTLED* led = new P_MPMTLED();
+        led->Streamer(b);
+        mpmt_LEDs.push_back(led);
+      }
+      b.CheckByteCount(R__s, R__c, "TriggerInfo");
+    } else {
+       unsigned int R__c = b.WriteVersion(TClass::GetClass("TriggerInfo"), kTRUE);
+       b << static_cast<unsigned char>(type);
+       b << time;
+       b << card_id;
+       b << spill_num;
+       b << vme_event_num;
+       b << mpmt_LEDs.size();
+       for(size_t i=0; i<mpmt_LEDs.size(); i++){
+         mpmt_LEDs.at(i)->Streamer(b);
+       }
+       b.SetByteCount(R__c, kTRUE);
+    }
+  }
 #ifndef __CLING__
   bool Serialise(BinaryStream &bs){
     

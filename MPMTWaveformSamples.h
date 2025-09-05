@@ -1,6 +1,7 @@
 #ifndef MPMTWaveformSamples_H
 #define MPMTWaveformSamples_H
 //#include "Rtypes.h" // for classdef, efficient streaming
+#include "TBuffer.h"
 
 struct MPMTWaveformSamples {
 	MPMTWaveformSamples(){};
@@ -66,5 +67,18 @@ struct MPMTWaveformSamples {
 		}
 	}
 	//ClassDef(MPMTWaveformSamples, 1);
+  	void Streamer(TBuffer &b){
+		if (b.IsReading()){
+			b >> nsamples;
+			b >> nbytes;
+			if (bytes) delete bytes;
+			bytes = new unsigned char[nbytes];
+			b.ReadFastArray(bytes, nbytes);
+		} else {
+			b << nsamples;
+			b << nbytes;
+			b.WriteFastArray(bytes, nbytes);
+		}
+	}
 };
 #endif
